@@ -26,6 +26,7 @@ def get_weather():
     response = requests.get(WEATHER_URL)
     data = response.json()
     if response.status_code != 200:
+        
         st.error(f"Error al obtener datos: {data.get('message')}")
         return None
     return {
