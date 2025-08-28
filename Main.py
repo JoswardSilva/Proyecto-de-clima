@@ -9,8 +9,8 @@ TIDES_API_KEY = "0d6fe98a-946e-4526-8228-78a2869019a2"
 
 # Ciudad y coordenadas
 CITY = "San Jose,CR"
-LAT = 9.9333    # latitud
-LON = -84.0833  # longitud
+LAT = 10.417 #9.9333    # latitud
+LON = -85.917#84.0833  # longitud
 
 # Umbrales
 TEMP_MAX = 35
