@@ -8,8 +8,8 @@ import time
 
 time.sleep(60)
 # 🔑 API Keys
-WEATHER_API_KEY = "6003055f360057221483472cfe44db29"
-TIDES_API_KEY = "0d6fe98a-946e-4526-8228-78a2869019a2"
+WEATHER_API_KEY = ""
+TIDES_API_KEY = ""
 
 # Ciudad y coordenadas
 CITY = "Guanacaste,CR"
