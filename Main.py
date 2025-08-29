@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pytz
 import matplotlib.dates as mdates
+import time
 
+time.sleep(60)
 # 🔑 API Keys
 WEATHER_API_KEY = "6003055f360057221483472cfe44db29"
 TIDES_API_KEY = "0d6fe98a-946e-4526-8228-78a2869019a2"
@@ -26,13 +28,14 @@ def get_weather():
     response = requests.get(WEATHER_URL)
     data = response.json()
     if response.status_code != 200:
-        
+
         st.error(f"Error al obtener datos: {data.get('message')}")
         return None
     return {
         "temperatura": data["main"]["temp"],
         "humedad": data["main"]["humidity"],
         "presion": data["main"]["pressure"]
+        
     }
 
 def get_tides():
@@ -43,16 +46,19 @@ def get_tides():
         return None
     return data["heights"]
 
+
 # ---- Interfaz Streamlit ----
 st.title("🌤️ Tracker de Clima y Mareas")
 st.write(f"📍 Ciudad: **{CITY}**")
 
 weather = get_weather()
+
 if weather:
     st.metric("🌡️ Temperatura", f"{weather['temperatura']} °C")
     st.metric("💧 Humedad", f"{weather['humedad']} %")
     st.metric("⬇️ Presión", f"{weather['presion']} hPa")
-
+    # Espera 1 minuto antes de la siguiente consulta
+   
     if weather["temperatura"] > TEMP_MAX:
         st.error(f"🔥 ALERTA: Temperatura muy alta ({weather['temperatura']}°C)")
     elif weather["temperatura"] < TEMP_MIN:
@@ -91,7 +97,7 @@ if tides:
     plt.title("Altura de la marea")
     plt.xlabel("Hora")
     plt.ylabel("Altura (m)")
-    plt.xticks(rotation=45)
+    #plt.xticks(rotation=45)
     plt.grid(True)
 
 # Formato de fecha y hora 
