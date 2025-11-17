@@ -8,8 +8,13 @@ import time
 
 time.sleep(60)
 # 🔑 API Keys
+<<<<<<< HEAD
 WEATHER_API_KEY = ""
 TIDES_API_KEY = ""
+=======
+WEATHER_API_KEY = "6003055f360057221483472cfe44db29"
+TIDES_API_KEY = "7cc79f5c-00cc-45c5-9797-1c1b82d4d026"
+>>>>>>> f74caf4 (a este punto ya se hizo la integracion con docker, se cambio el cadvisor a deployment. se agrego un nuevo dashboard a graphana. vamos por exersice 8)
 
 # Ciudad y coordenadas
 CITY = "Guanacaste,CR"
