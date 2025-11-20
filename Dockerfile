@@ -21,7 +21,15 @@ RUN apt-get update && \
 COPY Main.py .
 
 # Instalar dependencias de Python directamente
-RUN pip install --no-cache-dir streamlit requests matplotlib pytz
+RUN pip install --no-cache-dir \
+    streamlit \
+    requests \
+    matplotlib \
+    pytz \
+    opentelemetry-sdk \
+    opentelemetry-exporter-otlp \
+    opentelemetry-instrumentation-requests
+
 
 # Exponer el puerto por defecto de Streamlit
 EXPOSE 8501
