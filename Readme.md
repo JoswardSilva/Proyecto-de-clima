@@ -1,21 +1,149 @@
-Esta es mi aplicacion, enfocada para surfistas y pescadores la cual se va encargar de lo siguiente: 
 
-Tracker de clima
- Guardar métricas de temperatura, humedad, presión.
- Enviar alerta si la temperatura supera cierto umbral (ej: >35°C o <15°C)
+# Proyecto de Clima y Mareas 🌤️🌊
 
-Trae las mareas desde la API.
-Genera un gráfico de línea mostrando altura de la marea a lo largo del tiempo.
-Los picos representan marea alta, los valles marea baja.
-Integrado directamente en Streamlit, sin abrir otra ventana.
+## Descripción
+Este proyecto es una aplicación web desarrollada en **Python + Streamlit**, instrumentada con **OpenTelemetry**, y desplegada con **Kubernetes (Minikube)**.  
+Incluye observabilidad completa con **Prometheus**, **Grafana** y **Jaeger**.
 
-Paso 1: 
-instalacion de librerias
+La aplicación muestra:
+- Datos del clima (temperatura, humedad, presión) usando OpenWeather API.
+- Gráfico con próximas mareas usando WorldTides API.
+- Métricas expuestas mediante OpenTelemetry.
+- Dashboards y alertas en Grafana.
+- Trazas distribuidas en Jaeger.
 
-pip install requests #para hacer llamados de APIs
-pip install streamlit #para poder dar una pequeña interfaz grafica a la aplicacion tipo dashboard
-pip install matplotlib #para graficar las mareas y mostrarlas de forma visual en Streamlit.
+---
 
-una vez hecho esto se puede ejecutar usando el siguiente comand: 
+## Tecnologías Utilizadas
+- **Python 3**
+- **Streamlit**
+- **Flask**
+- **OpenTelemetry SDK + Collector**
+- **Prometheus**
+- **Grafana**
+- **Jaeger**
+- **Kubernetes (Minikube)**
+- **Docker**
 
- python -m streamlit run .\Main.py 
+---
+
+## Estructura del Proyecto
+```
+Proyecto-de-clima/
+├── Main.py                    # Aplicación principal
+├── Dockerfile                 # Imagen Docker
+├── deployment.yaml            # Deployment de Kubernetes
+├── service.yaml               # Servicio de la app
+├── prometheus.yaml            # Scrape configs
+├── otel-collector.yaml        # OTEL Collector (traces + metrics)
+├── grafana-dashboard.yaml     # Dashboards y alertas
+├── requirements.txt           # Dependencias Python
+└── README.md
+```
+
+---
+
+## Instalación y Ejecución Local (Docker)
+
+### 1. Clonar repositorio
+```bash
+git clone https://github.com/JoswardSilva/Proyecto-de-clima
+cd Proyecto-de-clima
+```
+
+### 2. Construir imagen Docker
+```bash
+docker build -t clima-app .
+```
+
+### 3. Ejecutar aplicación
+```bash
+docker run --rm -p 8501:8501 clima-app
+```
+
+Abrir en navegador:
+```
+http://localhost:8501
+```
+
+---
+
+## Despliegue Completo en Kubernetes (Minikube)
+
+### 1. Iniciar Minikube
+```bash
+minikube start
+```
+
+### 2. Aplicar manifiestos
+```bash
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl apply -f prometheus.yaml
+kubectl apply -f grafana-dashboard.yaml
+kubectl apply -f otel-collector.yaml
+```
+
+### 3. Verificar
+```bash
+kubectl get pods -A
+```
+
+### 4. Abrir servicios
+Prometheus:
+```bash
+minikube service prometheus-service -n monitoring
+```
+
+Grafana:
+```bash
+minikube service grafana-service -n application
+```
+
+Jaeger:
+```bash
+minikube service jaeger-service -n application
+```
+
+Aplicación:
+```bash
+minikube service clima-app-service -n application
+```
+
+---
+
+## Observabilidad
+
+### Trazas – Jaeger
+La app envía trazas instrumentadas automáticamente usando OTLP → OTEL Collector → Jaeger.
+
+### Métricas – Prometheus
+Prometheus captura:
+- Métricas internas del OTEL Collector  
+- Métricas generadas desde spanmetrics  
+- Métricas expuestas por la app  
+
+### Dashboards – Grafana
+Incluye dashboards listos para:
+- CPU usage  
+- Pod CPU usage  
+- Estado de la app `clima-app`  
+- Dashboards SRE (SLI/SLO/Error Budget)  
+- Alertas integradas  
+
+---
+
+## Dependencias Python
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Licencia
+MIT License.
+
+---
+
+## Autor
+**José Silva**
