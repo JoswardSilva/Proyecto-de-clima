@@ -36,7 +36,7 @@ Proyecto-de-clima/
 ├── service.yaml               # Servicio de la app
 ├── prometheus.yaml            # Scrape configs
 ├── otel-collector.yaml        # OTEL Collector (traces + metrics)
-├── grafana-dashboard.yaml     # Dashboards y alertas
+├── grafana.yaml     # Dashboards y alertas
 ├── requirements.txt           # Dependencias Python
 └── README.md
 ```
@@ -80,7 +80,7 @@ minikube start
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 kubectl apply -f prometheus.yaml
-kubectl apply -f grafana-dashboard.yaml
+kubectl apply -f grafana.yaml
 kubectl apply -f otel-collector.yaml
 ```
 
