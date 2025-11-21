@@ -67,10 +67,10 @@ success "Imagen lista: $IMAGE_NAME"
 #   CREAR NAMESPACES
 # =============================
 
-log "Creando namespaces si no existen..."
-kubectl create namespace $NAMESPACE_APP --dry-run=ignore -o yaml | kubectl apply -f -
-kubectl create namespace $NAMESPACE_OTEL --dry-run=ignore -o yaml | kubectl apply -f -
-kubectl create namespace $NAMESPACE_MONITORING --dry-run=ignore -o yaml | kubectl apply -f -
+log "Creando namespaces (si no existen)..."
+kubectl create namespace $NAMESPACE_APP --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace $NAMESPACE_OTEL --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace $NAMESPACE_MONITORING --dry-run=client -o yaml | kubectl apply -f -
 
 # =============================
 #   APLICAR MANIFESTS EN ORDEN
@@ -80,7 +80,7 @@ log "Aplicando configuración de OTEL Collector..."
 kubectl apply -f otel-collector.yaml
 
 log "Aplicando Jaeger..."
-kubectl apply -f jaeger.yaml
+kubectl apply -f jaegar.yaml
 
 log "Aplicando clima-app..."
 kubectl apply -f deployment.yaml
@@ -108,20 +108,6 @@ kubectl wait --for=condition=available --timeout=120s deployment/prometheus-depl
 kubectl wait --for=condition=available --timeout=120s deployment/grafana -n $NAMESPACE_APP || true
 kubectl wait --for=condition=available --timeout=120s deployment/otel-collector -n $NAMESPACE_OTEL || true
 
-# =============================
-#   MOSTRAR URLS DE SERVICIOS
-# =============================
 
 success "Despliegue completo."
-
-echo -e "${GREEN}"
-echo "📡 URLs de los servicios:"
-echo "-------------------------------------"
-echo "🌦 Clima App:       $(minikube service clima-app-service -n application --url)"
-echo "📈 Prometheus:      $(minikube service prometheus-service -n monitoring --url)"
-echo "📊 Grafana:         $(minikube service grafana-service -n application --url)"
-echo "🔍 Jaeger:          $(minikube service jaeger-service -n application --url)"
-echo "-------------------------------------"
-echo -e "${RESET}"
-
-success "Todo está funcionando correctamente 🎉"
+success "Todo está funcionando correctamente 🎉, ejecuta ./open-services.sh para ver todas las URLs y poder acceder"
