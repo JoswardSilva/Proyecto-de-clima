@@ -67,6 +67,7 @@ def get_weather():
 def get_tides():
     with tracer.start_as_current_span("get_tides"):
         r = requests.get(TIDES_URL)
+        st.write("DEBUG respuesta mareas:", r.text)
         data = r.json()
 
         if "heights" not in data:
@@ -80,7 +81,6 @@ with tracer.start_as_current_span("render_ui"):
 
     st.title("🌤️ Tracker de Clima y Mareas")
     st.write(f"📍 Ciudad: **{CITY}**")
-    st.write("♻️ *La app se refresca automáticamente cada 60 segundos*")
 
     weather = get_weather()
 
@@ -128,6 +128,4 @@ with tracer.start_as_current_span("render_ui"):
 
 
 # Auto-refresh cada minuto
-st.experimental_set_query_params(t=time.time())
-time.sleep(60)
-st.experimental_rerun()
+

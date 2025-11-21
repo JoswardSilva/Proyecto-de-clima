@@ -1,3 +1,232 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: application
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: application
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: application
+  labels:
+    grafana_dashboard: "1"
+data:
+  namespaces-overview.json: |
+    {
+      "id": null,
+      "title": "Kubernetes Namespaces Overview",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "10s",
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "CPU Usage by Namespace",
+          "targets": [
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace!=\"kube-system\"}[5m])) by (namespace)",
+              "legendFormat": "{{namespace}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Memory Usage by Namespace",
+          "targets": [
+            {
+              "expr": "sum(container_memory_usage_bytes{namespace!=\"kube-system\"}) by (namespace)",
+              "legendFormat": "{{namespace}}"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Running Pods",
+          "targets": [
+            {
+              "expr": "sum(kube_pod_status_ready{condition=\"true\"}) by (namespace)"
+            }
+          ]
+        }
+      ]
+    }
+
+  clima-app-sre.json: |
+    {
+      "id": null,
+      "title": "Clima-App SRE Dashboard",
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "15s",
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Success Rate (SLI)",
+          "targets": [
+            {
+              "expr": "1 - (sum(otel_collector_span_metrics_calls_total{job=\"clima-app\", status_code!=\"STATUS_CODE_UNSET\"}) / sum(otel_collector_span_metrics_calls_total{job=\"clima-app\"}))"
+            }
+          ]
+        },
+        {
+          "type": "gauge",
+          "title": "Error Budget Remaining (SLO 99%)",
+          "targets": [
+            {
+              "expr": "1 - ((1 - (1 - (sum(otel_collector_span_metrics_calls_total{job=\"clima-app\", status_code!=\"STATUS_CODE_UNSET\"}) / sum(otel_collector_span_metrics_calls_total{job=\"clima-app\"})))) / 0.01)"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Latency P99",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(otel_collector_span_metrics_duration_milliseconds_bucket{job=\"clima-app\"}[5m])) by (le))"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Request Throughput (req/s)",
+          "targets": [
+            {
+              "expr": "sum(rate(otel_collector_span_metrics_calls_total{job=\"clima-app\"}[1m]))"
+            }
+          ]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: application
+data:
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+---
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerts
+  namespace: application
+data:
+  alerts.yml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: cpu-namespace-alerts
+        folder: "SRE Alerts"
+        interval: "1m"
+        rules:
+          - uid: CPUHighNamespace
+            title: "High CPU Usage per Namespace"
+            condition: C
+            for: 5m                  # <-- ARREGLADO
+            data:
+              - refId: A
+                datasourceUid: prometheus
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  expr: sum(rate(container_cpu_usage_seconds_total[5m])) by (namespace)
+                  interval: ""
+                  legendFormat: "{{namespace}}"
+                  refId: A
+            thresholds:
+              - idx: 0
+                level: "warning"
+                value: 0.8
+            annotations:
+              summary: "High CPU detected in a namespace"
+              description: "One or more namespaces are using more than 80% CPU."
+
+      - orgId: 1
+        name: clima-app-alerts
+        folder: "SRE Alerts"
+        interval: "1m"
+        rules:
+
+          - uid: ErrorRateClima
+            title: "High Error Rate (clima-app)"
+            condition: B
+            for: 2m                  # <-- ARREGLADO
+            data:
+              - refId: B
+                datasourceUid: prometheus
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  expr: |
+                    (sum(otel_collector_span_metrics_calls_total{job="clima-app", status_code!="STATUS_CODE_UNSET"}) /
+                     sum(otel_collector_span_metrics_calls_total{job="clima-app"}))
+                  interval: ""
+                  legendFormat: "error_rate"
+                  refId: B
+            thresholds:
+              - idx: 0
+                level: "warning"
+                value: 0.05
+            annotations:
+              summary: "Error rate too high"
+              description: "More than 5% of requests to clima-app are failing."
+
+          - uid: LatencyP99
+            title: "High Latency P99 (clima-app)"
+            condition: D
+            for: 5m                   # <-- ARREGLADO
+            data:
+              - refId: D
+                datasourceUid: prometheus
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                model:
+                  expr: |
+                    histogram_quantile(0.99,
+                      sum(rate(otel_collector_span_metrics_duration_milliseconds_bucket{job="clima-app"}[5m])) by (le)
+                    )
+                  interval: ""
+                  legendFormat: "p99"
+                  refId: D
+            thresholds:
+              - idx: 0
+                level: "critical"
+                value: 2000
+            annotations:
+              summary: "Latency is too high"
+              description: "P99 latency is above 2 seconds."
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,6 +249,29 @@ spec:
         image: grafana/grafana:9.5.2
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: dashboards
+          mountPath: /var/lib/grafana/dashboards
+        - name: provisioning
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: alerting
+          mountPath: /etc/grafana/provisioning/alerting
+
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
+      - name: dashboards
+        configMap:
+          name: grafana-dashboards
+      - name: provisioning
+        configMap:
+          name: grafana-provisioning
+      - name: alerting
+        configMap:
+          name: grafana-alerts
 
 ---
 apiVersion: v1
@@ -34,3 +286,4 @@ spec:
   - port: 3000
     targetPort: 3000
   type: NodePort
+
