@@ -1,9 +1,7 @@
-
 # Proyecto de Clima y Mareas 🌤️🌊
 
 ## Descripción
-Este proyecto es una aplicación web desarrollada en **Python + Streamlit**, instrumentada con **OpenTelemetry**, y desplegada con **Kubernetes (Minikube)**.  
-Incluye observabilidad completa con **Prometheus**, **Grafana** y **Jaeger**.
+Este proyecto es una aplicación web desarrollada en **Python + Streamlit**, instrumentada con **OpenTelemetry**, y desplegada con **Kubernetes (Minikube)**. Incluye observabilidad completa con **Prometheus**, **Grafana** y **Jaeger**.
 
 La aplicación muestra:
 - Datos del clima (temperatura, humedad, presión) usando OpenWeather API.
@@ -17,7 +15,6 @@ La aplicación muestra:
 ## Tecnologías Utilizadas
 - **Python 3**
 - **Streamlit**
-- **Flask**
 - **OpenTelemetry SDK + Collector**
 - **Prometheus**
 - **Grafana**
@@ -34,10 +31,12 @@ Proyecto-de-clima/
 ├── Dockerfile                 # Imagen Docker
 ├── deployment.yaml            # Deployment de Kubernetes
 ├── service.yaml               # Servicio de la app
-├── prometheus.yaml            # Scrape configs
-├── otel-collector.yaml        # OTEL Collector (traces + metrics)
-├── grafana.yaml     # Dashboards y alertas
+├── configmap-clima.yaml       # ConfigMap sin datos sensibles
 ├── requirements.txt           # Dependencias Python
+├── grafana.yaml
+├── prometheus.yaml
+├── otel-collector.yaml
+├── .env.example               # Ejemplo de variables de entorno
 └── README.md
 ```
 
@@ -51,14 +50,29 @@ git clone https://github.com/JoswardSilva/Proyecto-de-clima
 cd Proyecto-de-clima
 ```
 
-### 2. Construir imagen Docker
+### 2. Configurar archivo `.env`
+Crea un archivo `.env` basado en `.env.example`:
+
+```
+WEATHER_API_KEY=TU_API_KEY
+TIDES_API_KEY=TU_API_KEY
+CITY=Guanacaste,CR
+LAT=10.417
+LON=-85.917
+TEMP_MAX=35
+TEMP_MIN=15
+```
+
+> ⚠️ **Nunca subas `.env` a GitHub.**
+
+### 3. Construir imagen Docker
 ```bash
 docker build -t clima-app .
 ```
 
-### 3. Ejecutar aplicación
+### 4. Ejecutar aplicación
 ```bash
-docker run --rm -p 8501:8501 clima-app
+docker run --rm -p 8501:8501 --env-file .env clima-app
 ```
 
 Abrir en navegador:
@@ -75,41 +89,62 @@ http://localhost:8501
 minikube start
 ```
 
-### 2. Aplicar manifiestos
+### 2. Crear Secret con las API Keys
+Debes crear las claves manualmente (no vienen en el repositorio):
+
 ```bash
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f prometheus.yaml
-kubectl apply -f grafana.yaml
-kubectl apply -f otel-collector.yaml
+kubectl create secret generic clima-secrets \
+  --namespace application \
+  --from-literal=WEATHER_API_KEY="<tu_api_key_de_openweather>" \
+  --from-literal=TIDES_API_KEY="<tu_api_key_de_mareas>"
 ```
 
-### 3. Verificar
+### 3. Verificar el Secret
+```bash
+kubectl get secret clima-secrets -n application -o yaml
+```
+
+### 4. Aplicar los manifiestos
+```bash
+kubectl apply -f configmap-clima.yaml
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+```
+
+### 5. Verificar pods
 ```bash
 kubectl get pods -A
 ```
 
-### 4. Abrir servicios
-Prometheus:
-```bash
-minikube service prometheus-service -n monitoring
-```
-
-Grafana:
-```bash
-minikube service grafana-service -n application
-```
-
-Jaeger:
-```bash
-minikube service jaeger-service -n application
-```
+### 6. Exponer servicios
 
 Aplicación:
 ```bash
 minikube service clima-app-service -n application
 ```
+Grafana:
+```bash
+minikube service grafana-service -n application
+```
+Prometheus:
+```bash
+minikube service prometheus-service -n monitoring
+```
+Jaeger:
+```bash
+minikube service jaeger-service -n application
+```
+Para ejecutar todo el proceso de manera automatizada puedes utilizar los siguientes comandos:
 
+```bash
+./deploy.sh
+```
+
+y luego abrir los servicios con:
+
+```bash
+./open-services.sh
+```
 ---
 
 ## Observabilidad
@@ -119,17 +154,17 @@ La app envía trazas instrumentadas automáticamente usando OTLP → OTEL Collec
 
 ### Métricas – Prometheus
 Prometheus captura:
-- Métricas internas del OTEL Collector  
-- Métricas generadas desde spanmetrics  
-- Métricas expuestas por la app  
+- Métricas internas del OTEL Collector
+- Métricas generadas desde spanmetrics
+- Métricas expuestas por la app
 
 ### Dashboards – Grafana
-Incluye dashboards listos para:
-- CPU usage  
-- Pod CPU usage  
-- Estado de la app `clima-app`  
-- Dashboards SRE (SLI/SLO/Error Budget)  
-- Alertas integradas  
+Incluye dashboards para:
+- Uso de CPU
+- Uso de CPU por Pod
+- Estado del deployment `clima-app`
+- Dashboards SRE (SLI/SLO/Error Budget)
+- Alertas dinámicas
 
 ---
 
@@ -140,10 +175,16 @@ pip install -r requirements.txt
 
 ---
 
-## Licencia
-MIT License.
+## Seguridad
+Este proyecto utiliza:
+- **ConfigMaps** para configuraciones públicas.
+- **Secrets** para variables sensibles.
+- `.env.example` como plantilla SIN claves reales.
+
+> ⚠️ No se deben subir API keys reales ni archivos `Secret` al repositorio.
 
 ---
 
 ## Autor
-**José Silva**
+**Josward Silva**
+
