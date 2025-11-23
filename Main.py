@@ -5,7 +5,9 @@ from datetime import datetime
 import pytz
 import matplotlib.dates as mdates
 import time
-
+from dotenv import load_dotenv
+load_dotenv()
+import os
 # ------------OPENTELEMETRY------------
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -38,15 +40,19 @@ CITY = "Guanacaste,CR"
 LAT = 10.417
 LON = -85.917
 
-WEATHER_API_KEY = "6003055f360057221483472cfe44db29"
-TIDES_API_KEY = "7cc79f5c-00cc-45c5-9797-1c1b82d4d026"
 
-TEMP_MAX = 35
-TEMP_MIN = 15
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY", "")
+TIDES_API_KEY = os.getenv("TIDES_API_KEY", "")
+
+TEMP_MAX = int(os.getenv("TEMP_MAX", 35))
+TEMP_MIN = int(os.getenv("TEMP_MIN", 15))
+
+CITY = os.getenv("CITY", "San Jose")
+LAT = os.getenv("LAT", "9.9281")
+LON = os.getenv("LON", "-84.0907")
 
 WEATHER_URL = f"https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={WEATHER_API_KEY}&units=metric"
-TIDES_URL = f"https://www.worldtides.info/api/v3?heights&lat={LAT}&lon={LON}&key={TIDES_API_KEY}"
-
+TIDES_URL   = f"https://www.worldtides.info/api/v3?heights&lat={LAT}&lon={LON}&key={TIDES_API_KEY}"
 
 # ------------FUNCIONES------------
 def get_weather():
@@ -67,7 +73,7 @@ def get_weather():
 def get_tides():
     with tracer.start_as_current_span("get_tides"):
         r = requests.get(TIDES_URL)
-        st.write("DEBUG respuesta mareas:", r.text)
+        #st.write("DEBUG respuesta mareas:", r.text)
         data = r.json()
 
         if "heights" not in data:
@@ -128,4 +134,5 @@ with tracer.start_as_current_span("render_ui"):
 
 
 # Auto-refresh cada minuto
+
 

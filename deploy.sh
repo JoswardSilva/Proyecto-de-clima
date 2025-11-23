@@ -91,6 +91,9 @@ kubectl apply -f grafana.yaml
 log "Aplicando Prometheus..."
 kubectl apply -f prometheus.yaml
 
+log "Aplicando clima-app..."
+kubectl apply -f configmap-clima.yaml
+
 # =============================
 #   RESTART DEPLOYMENT
 # =============================

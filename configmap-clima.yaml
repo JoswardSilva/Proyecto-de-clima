@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clima-config
+  namespace: application
+data:
+  TEMP_MAX: "35"
+  TEMP_MIN: "15"
+  CITY: "Guanacaste,CR"
+  LAT: "10.417"
+  LON: "-85.917"
+

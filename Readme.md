@@ -146,4 +146,4 @@ MIT License.
 ---
 
 ## Autor
-**Josward Silva**
+**José Silva**

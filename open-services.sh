@@ -9,7 +9,7 @@ minikube service grafana-service -n application &
 echo "📈 Abriendo Prometheus..."
 minikube service prometheus-service -n monitoring &
 
-echo "ejecutando aplicacion de mareas" 
+echo "📈 ejecutando aplicacion de mareas" 
 minikube service clima-app-service --url -n application
 
 

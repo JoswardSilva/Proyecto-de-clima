@@ -25,7 +25,59 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8501
+
         env:
+        # ==========================
+        # API KEYS (SECRET)
+        # ==========================
+        - name: WEATHER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: clima-secrets
+              key: WEATHER_API_KEY
+
+        - name: TIDES_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: clima-secrets
+              key: TIDES_API_KEY
+
+        # ==========================
+        # CONFIGMAP VARIABLES
+        # ==========================
+        - name: TEMP_MAX
+          valueFrom:
+            configMapKeyRef:
+              name: clima-config
+              key: TEMP_MAX
+
+        - name: TEMP_MIN
+          valueFrom:
+            configMapKeyRef:
+              name: clima-config
+              key: TEMP_MIN
+
+        - name: CITY
+          valueFrom:
+            configMapKeyRef:
+              name: clima-config
+              key: CITY
+
+        - name: LAT
+          valueFrom:
+            configMapKeyRef:
+              name: clima-config
+              key: LAT
+
+        - name: LON
+          valueFrom:
+            configMapKeyRef:
+              name: clima-config
+              key: LON
+
+        # ==========================
+        # OTEL (SIN CAMBIOS)
+        # ==========================
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "http://otel-collector.opentelemetry.svc.cluster.local:4317"
 

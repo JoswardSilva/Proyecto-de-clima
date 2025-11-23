@@ -17,8 +17,9 @@ RUN apt-get update && \
     libxext6 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copiar el archivo principal
+# Copiar archivos
 COPY Main.py .
+COPY .env .env
 
 # Instalar dependencias de Python directamente
 RUN pip install --no-cache-dir \
@@ -28,11 +29,12 @@ RUN pip install --no-cache-dir \
     pytz \
     opentelemetry-sdk \
     opentelemetry-exporter-otlp \
-    opentelemetry-instrumentation-requests
+    opentelemetry-instrumentation-requests \
+    python-dotenv
 
-
-# Exponer el puerto por defecto de Streamlit
+# Exponer puerto Streamlit
 EXPOSE 8501
 
-# Comando por defecto para correr la app
+# Ejecutar app
 CMD ["streamlit", "run", "Main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
