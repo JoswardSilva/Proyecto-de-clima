@@ -33,9 +33,9 @@ Proyecto-de-clima/
 ├── service.yaml               # Servicio de la app
 ├── configmap-clima.yaml       # ConfigMap sin datos sensibles
 ├── requirements.txt           # Dependencias Python
-├── grafana.yaml
-├── prometheus.yaml
-├── otel-collector.yaml
+├── grafana.yaml               # Dashboards y alertas
+├── prometheus.yaml            # Scrape configs
+├── otel-collector.yaml        # OTEL Collector (traces + metrics)
 ├── .env.example               # Ejemplo de variables de entorno
 └── README.md
 ```
