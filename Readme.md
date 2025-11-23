@@ -11,6 +11,15 @@ La aplicación muestra:
 - Trazas distribuidas en Jaeger.
 
 ---
+### Getting Started
+Antes de trabajar en cualquier paso o componente, asegúrate de instalar todas las herramientas necesarias. Hemos preparado una guía detallada de instalación tanto para macOS como para Windows (WSL2).
+
+👉 **Comienza con la [Guía de Instalación de Herramientas](installationes.md)**
+
+Allí encontrarás instrucciones para instalar Python, Docker, Colima, Minikube, kubectl y otros requisitos dependiendo de tu sistema operativo.
+
+
+---
 
 ## Tecnologías Utilizadas
 - **Python 3**
