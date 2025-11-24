@@ -94,6 +94,15 @@ kubectl apply -f prometheus.yaml
 log "Aplicando clima-app..."
 kubectl apply -f configmap-clima.yaml
 
+log "Aplicando service.yaml..."
+kubectl apply -f service.yaml
+
+log "Aplicando Prometheus RBAC..."
+kubectl apply -f prometheus-rbac-cluster.yaml
+
+log "Aplicando cadvisor..."
+kubectl apply -f cadvisor.yaml
+
 # =============================
 #   RESTART DEPLOYMENT
 # =============================
