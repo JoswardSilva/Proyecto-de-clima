@@ -51,13 +51,20 @@ Proyecto-de-clima/
 
 ---
 
-## Instalación y Ejecución Local (Docker)
+Aqui tienes los pasos manuales:
 
 ### 1. Clonar repositorio
 ```bash
 git clone https://github.com/JoswardSilva/Proyecto-de-clima
 cd Proyecto-de-clima
+chmod +x a deploy.sh y openservices.sh
 ```
+### 1.5 Iniciar sesion en docker hub:
+```bash
+docker login -u username
+pass:docker token
+```
+
 
 ### 2. Configurar archivo `.env`
 Crea un archivo `.env` basado en `.env.example`:
@@ -72,6 +79,28 @@ TEMP_MAX=35
 TEMP_MIN=15
 ```
 
+## Instalación y Ejecución Local (Docker)
+
+Para ejecutar todo el proceso de manera automatizada puedes utilizar los siguientes comandos, recuerda crear el ./evn y secrets con las APIs luego de aplicar "deploy.sh"
+
+```bash
+./deploy.sh
+
+kubectl create secret generic clima-secrets \
+  --namespace application \
+  --from-literal=WEATHER_API_KEY="<tu_api_key_de_openweather>" \
+  --from-literal=TIDES_API_KEY="<tu_api_key_de_mareas>"
+
+kubectl rollout restart deployment/clima-app -n application || true
+```
+
+y luego abrir los servicios con:
+
+```bash
+./open-services.sh
+```
+---
+
 > ⚠️ **Nunca subas `.env` a GitHub.**
 
 ### 3. Construir imagen Docker
@@ -81,7 +110,7 @@ docker build -t clima-app .
 
 ### 4. Ejecutar aplicación
 ```bash
-docker run --rm -p 8501:8501 --env-file .env clima-app
+minikube service clima-app-service -n application
 ```
 
 Abrir en navegador:
@@ -118,6 +147,9 @@ kubectl get secret clima-secrets -n application -o yaml
 kubectl apply -f configmap-clima.yaml
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
+kubectl apply -f grafana.yaml
+kubectl apply -f prometheus-rbac-cluster.yaml
+kubectl apply -f cadvisor.yaml
 ```
 
 ### 5. Verificar pods
@@ -141,20 +173,8 @@ minikube service prometheus-service -n monitoring
 ```
 Jaeger:
 ```bash
-minikube service jaeger-service -n application
+minikube service jaeger-service -n opentelemetry
 ```
-Para ejecutar todo el proceso de manera automatizada puedes utilizar los siguientes comandos:
-
-```bash
-./deploy.sh
-```
-
-y luego abrir los servicios con:
-
-```bash
-./open-services.sh
-```
----
 
 ## Observabilidad
 
