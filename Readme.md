@@ -14,7 +14,7 @@ La aplicación muestra:
 ### Getting Started
 Antes de trabajar en cualquier paso o componente, asegúrate de instalar todas las herramientas necesarias. Hemos preparado una guía detallada de instalación tanto para macOS como para Windows (WSL2).
 
-👉 **Comienza con la [Guía de Instalación de Herramientas](installationes.md)**
+ **Comienza con la [Guía de Instalación de Herramientas](installationes.md)**
 
 Allí encontrarás instrucciones para instalar Python, Docker, Colima, Minikube, kubectl y otros requisitos dependiendo de tu sistema operativo.
 
@@ -101,7 +101,7 @@ y luego abrir los servicios con:
 ```
 ---
 
-> ⚠️ **Nunca subas `.env` a GitHub.**
+
 
 ### 3. Construir imagen Docker
 ```bash
@@ -208,9 +208,8 @@ pip install -r requirements.txt
 Este proyecto utiliza:
 - **ConfigMaps** para configuraciones públicas.
 - **Secrets** para variables sensibles.
-- `.env.example` como plantilla SIN claves reales.
 
-> ⚠️ No se deben subir API keys reales ni archivos `Secret` al repositorio.
+
 
 ---
 
